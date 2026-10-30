@@ -1,0 +1,365 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZENTRIXTEC | Gestión Empresarial</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+<body>
+
+<div class="layout">
+
+    <aside class="sidebar" id="sidebar">
+        <div class="brand">
+            <div class="brand-logo">Z</div>
+            <div>
+                <h2>ZENTRIXTEC</h2>
+                <small>CONTROL EMPRESARIAL</small>
+            </div>
+        </div>
+
+        <p class="menu-title">MENÚ PRINCIPAL</p>
+
+        <nav>
+            <button class="nav-button active" data-page="dashboard">▦ Panel principal</button>
+            <button class="nav-button" data-page="inventory">▤ Inventario</button>
+            <button class="nav-button" data-page="alerts">
+                ♢ Notificaciones <span id="alertBadge">0</span>
+            </button>
+            <button class="nav-button" data-page="sales">🛒 Ventas</button>
+            <button class="nav-button" data-page="analytics">▥ Análisis comercial</button>
+            <button class="nav-button" data-page="reports">▧ Reportes</button>
+        </nav>
+
+        <div class="sidebar-bottom">
+            <div class="connection">
+                <strong>☁ Zoho Books</strong>
+                <p>Conexión pendiente</p>
+                <small>Preparado para integración</small>
+            </div>
+            <div class="profile">
+                <div class="avatar">ZT</div>
+                <div>
+                    <strong>Administrador</strong>
+                    <small>Gestión empresarial</small>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <main class="main">
+        <header class="topbar">
+            <div class="topbar-left">
+                <button id="menuToggle" class="menu-toggle">☰</button>
+                <div>
+                    <small>ZENTRIXTEC / <span id="breadcrumb">Panel principal</span></small>
+                    <h1 id="pageTitle">Panel principal</h1>
+                </div>
+            </div>
+            <div class="topbar-right">
+                <span id="currentDate"></span>
+                <button class="bell" data-goto="alerts">♧ <span id="bellBadge">0</span></button>
+            </div>
+        </header>
+
+        <div class="content">
+
+            <!-- PANEL PRINCIPAL -->
+            <section class="page active" id="dashboard">
+                <div class="intro">
+                    <div>
+                        <h2>Resumen general</h2>
+                        <p>Consulta el estado de tu gestión comercial.</p>
+                    </div>
+                    <span class="demo-tag">● Datos de demostración</span>
+                </div>
+
+                <div class="stats">
+                    <article class="stat">
+                        <div class="stat-heading">Ingresos registrados <span class="stat-icon blue">Bs</span></div>
+                        <h2 id="dashboardIncome">Bs. 0</h2>
+                        <small>Según las ventas de ejemplo</small>
+                    </article>
+
+                    <article class="stat">
+                        <div class="stat-heading">Productos registrados <span class="stat-icon purple">▤</span></div>
+                        <h2 id="dashboardProducts">0</h2>
+                        <small>Productos en inventario</small>
+                    </article>
+
+                    <article class="stat">
+                        <div class="stat-heading">Unidades disponibles <span class="stat-icon green">▦</span></div>
+                        <h2 id="dashboardUnits">0</h2>
+                        <small>Existencias actuales</small>
+                    </article>
+
+                    <article class="stat">
+                        <div class="stat-heading">Alertas de inventario <span class="stat-icon orange">!</span></div>
+                        <h2 id="dashboardAlerts">0</h2>
+                        <small>Necesitan atención</small>
+                    </article>
+                </div>
+
+                <div class="two-columns">
+                    <article class="panel">
+                        <div class="panel-heading">
+                            <div>
+                                <h3>Ingresos por mes</h3>
+                                <p>Comportamiento de las ventas</p>
+                            </div>
+                            <span class="small-tag">Últimos 6 meses</span>
+                        </div>
+                        <div id="incomeBars" class="bars"></div>
+                    </article>
+
+                    <article class="panel">
+                        <div class="panel-heading">
+                            <div>
+                                <h3>Estado del inventario</h3>
+                                <p>Situación de los productos</p>
+                            </div>
+                        </div>
+                        <div id="stockSummary" class="stock-summary"></div>
+                    </article>
+                </div>
+
+                <div class="two-columns lower-columns">
+                    <article class="panel">
+                        <div class="panel-heading">
+                            <div>
+                                <h3>Productos que requieren atención</h3>
+                                <p>Revisa las existencias bajas o agotadas.</p>
+                            </div>
+                            <button class="link-button" data-goto="alerts">Ver todas →</button>
+                        </div>
+                        <div id="dashboardAlertList"></div>
+                    </article>
+
+                    <article class="panel">
+                        <div class="panel-heading">
+                            <div>
+                                <h3>Productos más vendidos</h3>
+                                <p>Según las operaciones de ejemplo.</p>
+                            </div>
+                        </div>
+                        <div id="dashboardTopProducts"></div>
+                    </article>
+                </div>
+            </section>
+
+            <!-- INVENTARIO -->
+            <section class="page" id="inventory">
+                <div class="intro">
+                    <div>
+                        <h2>Control de inventario</h2>
+                        <p>Consulta las existencias de los productos.</p>
+                    </div>
+                    <button class="primary-button" id="exportInventory">↓ Exportar inventario</button>
+                </div>
+
+                <div class="mini-stats">
+                    <div class="mini-stat"><small>Total de productos</small><strong id="inventoryCount">0</strong></div>
+                    <div class="mini-stat"><small>Unidades disponibles</small><strong id="inventoryUnits">0</strong></div>
+                    <div class="mini-stat"><small>Stock bajo</small><strong class="orange-text" id="inventoryLow">0</strong></div>
+                    <div class="mini-stat"><small>Agotados</small><strong class="red-text" id="inventoryEmpty">0</strong></div>
+                </div>
+
+                <article class="panel table-panel">
+                    <div class="table-heading">
+                        <div>
+                            <h3>Listado de productos</h3>
+                            <p>Información de inventario de demostración.</p>
+                        </div>
+                        <div class="filters">
+                            <input type="search" id="inventorySearch" placeholder="Buscar producto...">
+                            <select id="inventoryFilter">
+                                <option value="all">Todos los estados</option>
+                                <option value="available">Disponible</option>
+                                <option value="low">Stock bajo</option>
+                                <option value="empty">Agotado</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="table-scroll">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>PRODUCTO</th>
+                                    <th>CÓDIGO</th>
+                                    <th>CATEGORÍA</th>
+                                    <th>EXISTENCIAS</th>
+                                    <th>PRECIO</th>
+                                    <th>ESTADO</th>
+                                </tr>
+                            </thead>
+                            <tbody id="inventoryTable"></tbody>
+                        </table>
+                    </div>
+                </article>
+            </section>
+
+            <!-- NOTIFICACIONES -->
+            <section class="page" id="alerts">
+                <div class="intro">
+                    <div>
+                        <h2>Centro de notificaciones</h2>
+                        <p>Productos que necesitan atención inmediata.</p>
+                    </div>
+                    <span class="alert-count" id="alertSummary">0 alertas activas</span>
+                </div>
+
+                <div class="alert-banner">
+                    <div class="alert-banner-icon">!</div>
+                    <div>
+                        <h3>Supervisión de inventario</h3>
+                        <p>Revisa los productos que tienen pocas unidades o que se encuentran agotados.</p>
+                    </div>
+                </div>
+
+                <div class="alert-grid" id="allAlerts"></div>
+            </section>
+
+            <!-- VENTAS -->
+            <section class="page" id="sales">
+                <div class="intro">
+                    <div>
+                        <h2>Registro de ventas</h2>
+                        <p>Consulta las operaciones comerciales registradas.</p>
+                    </div>
+                    <span class="demo-tag">● Datos de demostración</span>
+                </div>
+
+                <div class="mini-stats">
+                    <div class="mini-stat"><small>Ventas registradas</small><strong id="salesCount">0</strong></div>
+                    <div class="mini-stat"><small>Ingresos totales</small><strong id="salesIncome">Bs. 0</strong></div>
+                    <div class="mini-stat"><small>Promedio por venta</small><strong id="salesAverage">Bs. 0</strong></div>
+                    <div class="mini-stat"><small>Unidades vendidas</small><strong id="salesUnits">0</strong></div>
+                </div>
+
+                <article class="panel table-panel">
+                    <div class="table-heading">
+                        <div>
+                            <h3>Historial de ventas</h3>
+                            <p>Resumen de operaciones de ejemplo.</p>
+                        </div>
+                        <input type="search" id="salesSearch" placeholder="Buscar venta...">
+                    </div>
+                    <div class="table-scroll">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>OPERACIÓN</th>
+                                    <th>PRODUCTO</th>
+                                    <th>CANTIDAD</th>
+                                    <th>FECHA</th>
+                                    <th>TOTAL</th>
+                                    <th>ESTADO</th>
+                                </tr>
+                            </thead>
+                            <tbody id="salesTable"></tbody>
+                        </table>
+                    </div>
+                </article>
+            </section>
+
+            <!-- ANÁLISIS -->
+            <section class="page" id="analytics">
+                <div class="intro">
+                    <div>
+                        <h2>Análisis comercial</h2>
+                        <p>Información para conocer el comportamiento de las ventas.</p>
+                    </div>
+                </div>
+
+                <div class="two-columns">
+                    <article class="stat">
+                        <div class="stat-heading">Producto más vendido <span class="stat-icon green">↑</span></div>
+                        <h2 class="analysis-product" id="bestProduct">-</h2>
+                        <small id="bestQuantity">0 unidades vendidas</small>
+                    </article>
+                    <article class="stat">
+                        <div class="stat-heading">Producto con menos ventas <span class="stat-icon orange">↓</span></div>
+                        <h2 class="analysis-product" id="leastProduct">-</h2>
+                        <small id="leastQuantity">0 unidades vendidas</small>
+                    </article>
+                </div>
+
+                <div class="two-columns">
+                    <article class="panel">
+                        <div class="panel-heading">
+                            <div><h3>Comparación de productos</h3><p>Unidades vendidas por producto.</p></div>
+                        </div>
+                        <div id="productBars" class="horizontal-bars"></div>
+                    </article>
+
+                    <article class="panel">
+                        <div class="panel-heading">
+                            <div><h3>Resumen comercial</h3><p>Indicadores de demostración.</p></div>
+                        </div>
+                        <div class="summary-list">
+                            <div><span>Ingresos registrados</span><strong id="analysisIncome">Bs. 0</strong></div>
+                            <div><span>Operaciones realizadas</span><strong id="analysisSales">0</strong></div>
+                            <div><span>Unidades vendidas</span><strong id="analysisUnits">0</strong></div>
+                            <div><span>Productos en alerta</span><strong id="analysisAlerts">0</strong></div>
+                        </div>
+                    </article>
+                </div>
+            </section>
+
+            <!-- REPORTES -->
+            <section class="page" id="reports">
+                <div class="intro">
+                    <div>
+                        <h2>Reportes empresariales</h2>
+                        <p>Descarga información de los datos disponibles.</p>
+                    </div>
+                </div>
+
+                <div class="report-grid">
+                    <article class="report-card">
+                        <div class="report-icon blue">▤</div>
+                        <h3>Reporte de inventario</h3>
+                        <p>Productos, cantidades, precios y estado del inventario.</p>
+                        <button class="secondary-button" id="reportInventory">Descargar CSV ↓</button>
+                    </article>
+
+                    <article class="report-card">
+                        <div class="report-icon green">🛒</div>
+                        <h3>Reporte de ventas</h3>
+                        <p>Detalle de las operaciones y sus importes.</p>
+                        <button class="secondary-button" id="reportSales">Descargar CSV ↓</button>
+                    </article>
+
+                    <article class="report-card">
+                        <div class="report-icon orange">!</div>
+                        <h3>Reporte de alertas</h3>
+                        <p>Productos con pocas unidades o agotados.</p>
+                        <button class="secondary-button" id="reportAlerts">Descargar CSV ↓</button>
+                    </article>
+                </div>
+
+                <article class="panel zoho-panel">
+                    <div class="zoho-symbol">☁</div>
+                    <div>
+                        <h3>Integración con Zoho Books</h3>
+                        <p>ZENTRIXTEC está diseñado para consultar información de Zoho Books mediante una futura conexión segura.</p>
+                        <span class="pending">● Integración pendiente de implementar</span>
+                    </div>
+                </article>
+            </section>
+
+            <footer class="footer">
+                <span>© 2026 ZENTRIXTEC. Sistema de control empresarial.</span>
+                <span>Versión de demostración</span>
+            </footer>
+
+        </div>
+    </main>
+</div>
+
+</body>
+</html>
