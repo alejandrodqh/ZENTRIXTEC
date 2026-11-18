@@ -5,39 +5,31 @@
 // DATOS DE DEMOSTRACIÓN
 // ======================================
 
-const products = [
-    { id: "ZT001", name: "Laptop Lenovo IdeaPad", category: "Computadoras", stock: 2, minimum: 5, price: 4200 },
-    { id: "ZT002", name: "Impresora Epson L3250", category: "Impresoras", stock: 8, minimum: 3, price: 1850 },
-    { id: "ZT003", name: "Teclado Logitech K120", category: "Accesorios", stock: 4, minimum: 5, price: 120 },
-    { id: "ZT004", name: "Mouse Redragon M601", category: "Accesorios", stock: 0, minimum: 3, price: 95 },
-    { id: "ZT005", name: "Monitor Samsung 24 pulgadas", category: "Monitores", stock: 12, minimum: 4, price: 1150 },
-    { id: "ZT006", name: "Memoria RAM Kingston 16GB", category: "Componentes", stock: 3, minimum: 5, price: 450 },
-    { id: "ZT007", name: "Disco SSD Kingston 500GB", category: "Componentes", stock: 15, minimum: 5, price: 380 },
-    { id: "ZT008", name: "Audífonos HyperX Cloud", category: "Accesorios", stock: 1, minimum: 4, price: 520 },
-    { id: "ZT009", name: "Tarjeta gráfica ASUS", category: "Componentes", stock: 6, minimum: 2, price: 2800 },
-    { id: "ZT010", name: "Fuente de poder Corsair", category: "Componentes", stock: 0, minimum: 2, price: 650 }
+const STORAGE_KEY = "zentrixtec_fair_v1";
+const sampleProducts = [
+ {id:"ZT001",name:"Laptop Lenovo IdeaPad",category:"Computadoras",stock:12,minimum:5,price:4200,cost:3500},
+ {id:"ZT002",name:"Impresora Epson L3250",category:"Impresoras",stock:8,minimum:3,price:1850,cost:1450},
+ {id:"ZT003",name:"Teclado Logitech K120",category:"Accesorios",stock:14,minimum:5,price:120,cost:75},
+ {id:"ZT004",name:"Mouse Redragon M601",category:"Accesorios",stock:0,minimum:3,price:95,cost:60},
+ {id:"ZT005",name:"Monitor Samsung 24 pulgadas",category:"Monitores",stock:12,minimum:4,price:1150,cost:900},
+ {id:"ZT006",name:"Memoria RAM Kingston 16GB",category:"Componentes",stock:3,minimum:5,price:450,cost:330}
 ];
-
-const sales = [
-    { id: "V-001", product: "Laptop Lenovo IdeaPad", quantity: 2, date: "2026-10-02", total: 8400 },
-    { id: "V-002", product: "Teclado Logitech K120", quantity: 8, date: "2026-10-04", total: 960 },
-    { id: "V-003", product: "Monitor Samsung 24 pulgadas", quantity: 5, date: "2026-10-08", total: 5750 },
-    { id: "V-004", product: "Mouse Redragon M601", quantity: 12, date: "2026-10-11", total: 1140 },
-    { id: "V-005", product: "Impresora Epson L3250", quantity: 3, date: "2026-10-15", total: 5550 },
-    { id: "V-006", product: "Disco SSD Kingston 500GB", quantity: 10, date: "2026-10-18", total: 3800 },
-    { id: "V-007", product: "Teclado Logitech K120", quantity: 6, date: "2026-10-20", total: 720 },
-    { id: "V-008", product: "Audífonos HyperX Cloud", quantity: 4, date: "2026-10-22", total: 2080 }
-];
-
-const monthlyIncome = [
-    { month: "Mayo", value: 12500 },
-    { month: "Junio", value: 15800 },
-    { month: "Julio", value: 14200 },
-    { month: "Agosto", value: 19300 },
-    { month: "Sept.", value: 17600 },
-    { month: "Octubre", value: 28400 }
-];
-
+let db;
+try { db=JSON.parse(localStorage.getItem(STORAGE_KEY)); } catch(error) {db=null;}
+if(!db||!Array.isArray(db.products)||!Array.isArray(db.sales))db={products:sampleProducts,sales:[],expenses:[],movements:[],nextProduct:7,nextSale:1};
+db.expenses ||= [];db.movements ||= [];
+const products=db.products,sales=db.sales;
+let monthlyIncome=[];
+function refreshMonthlyIncome(){
+ monthlyIncome=[];
+ for(let i=5;i>=0;i--){let d=new Date();d.setMonth(d.getMonth()-i);monthlyIncome.push({month:d.toLocaleDateString("es-BO",{month:"short"}),key:d.getFullYear()+"-"+d.getMonth(),value:0});}
+ sales.forEach(s=>{const d=new Date(s.iso||s.date+"T12:00:00");const m=monthlyIncome.find(x=>x.key===d.getFullYear()+"-"+d.getMonth());if(m)m.value+=s.total;});
+}
+function persist(){localStorage.setItem(STORAGE_KEY,JSON.stringify(db));renderEverything();}
+const $=id=>document.getElementById(id);
+function notify(message){alert(message);}
+function fillSelects(){const opts=products.map(p=>`<option value="${escapeHTML(p.id)}">${escapeHTML(p.name)} (stock: ${p.stock})</option>`).join("");$("saleProduct").innerHTML=opts;$("movementProduct").innerHTML=opts;}
+function renderEverything(){refreshMonthlyIncome();renderDashboard();renderInventory();renderAlerts();renderSales();renderAnalytics();renderMovements();renderFinance();}
 // ======================================
 // FUNCIONES GENERALES
 // ======================================
@@ -110,7 +102,9 @@ const pageNames = {
     alerts: "Notificaciones",
     sales: "Ventas",
     analytics: "Análisis comercial",
-    reports: "Reportes"
+    reports: "Reportes",
+    movements: "Movimientos de almacén",
+    finance: "Finanzas y contabilidad"
 };
 
 function openPage(pageId) {
@@ -128,6 +122,7 @@ function openPage(pageId) {
     document.getElementById("breadcrumb").textContent = pageNames[pageId];
 
     document.getElementById("sidebar").classList.remove("open");
+    renderEverything();
 }
 
 document.querySelectorAll(".nav-button").forEach(button => {
@@ -182,7 +177,7 @@ function renderDashboard() {
 
 function renderIncomeBars() {
     const container = document.getElementById("incomeBars");
-    const maximum = Math.max(...monthlyIncome.map(item => item.value));
+    const maximum = Math.max(1, ...monthlyIncome.map(item => item.value));
 
     container.innerHTML = monthlyIncome.map(item => {
         const height = Math.max(5, (item.value / maximum) * 100);
@@ -288,7 +283,7 @@ function renderInventory() {
 
     if (filtered.length === 0) {
         table.innerHTML = `
-            <tr><td colspan="6" class="empty-message">No se encontraron productos.</td></tr>
+            <tr><td colspan="7" class="empty-message">No se encontraron productos.</td></tr>
         `;
     } else {
         table.innerHTML = filtered.map(product => `
@@ -299,6 +294,7 @@ function renderInventory() {
                 <td>${product.stock} unidades</td>
                 <td>${money(product.price)}</td>
                 <td><span class="status ${statusOf(product)}">${statusText(product)}</span></td>
+                <td><button class="small-action" onclick="editProduct('${product.id}')">Editar</button><button class="small-action danger" onclick="removeProduct('${product.id}')">Eliminar</button></td>
             </tr>
         `).join("");
     }
@@ -527,12 +523,90 @@ document.getElementById("reportAlerts").addEventListener("click", exportAlerts);
 // ======================================
 
 function initialize() {
+    refreshMonthlyIncome();
     showDate();
     renderDashboard();
     renderInventory();
     renderAlerts();
     renderSales();
     renderAnalytics();
+}
+
+
+// ======================================
+// FUNCIONES DE GESTIÓN DE LA DEMOSTRACIÓN
+// ======================================
+document.querySelectorAll("[data-close]").forEach(b=>b.addEventListener("click",()=>$(b.dataset.close).close()));
+$("addProduct").addEventListener("click",()=>{$("productForm").reset();$("productId").value="";$("productHeading").textContent="Agregar producto";$("productDialog").showModal();});
+window.editProduct=id=>{
+ const p=products.find(p=>p.id===id);if(!p)return;
+ $("productId").value=p.id;$("productName").value=p.name;$("productCategory").value=p.category;
+ $("productStock").value=p.stock;$("productPrice").value=p.price;$("productCost").value=p.cost||0;$("productMin").value=p.minimum;
+ $("productHeading").textContent="Editar producto";$("productDialog").showModal();
+};
+window.removeProduct=id=>{
+ const i=products.findIndex(p=>p.id===id);if(i<0)return;
+ if(confirm("¿Eliminar este producto del inventario?")){products.splice(i,1);persist();}
+};
+$("productForm").addEventListener("submit",event=>{
+ event.preventDefault();
+ const id=$("productId").value;
+ const p={name:$("productName").value.trim(),category:$("productCategory").value,stock:Number($("productStock").value),price:Number($("productPrice").value),cost:Number($("productCost").value),minimum:Number($("productMin").value)};
+ if(!p.name||!Number.isInteger(p.stock)||p.stock<0||p.price<=0||p.cost<0||!Number.isInteger(p.minimum)||p.minimum<0){notify("Revisa los datos del producto.");return;}
+ if(id){Object.assign(products.find(x=>x.id===id),p);}
+ else {p.id="ZT"+String(db.nextProduct++).padStart(3,"0");products.push(p);}
+ $("productDialog").close();persist();
+});
+$("addSale").addEventListener("click",()=>{
+ if(!products.some(p=>p.stock>0)){notify("No hay productos disponibles.");return;}
+ $("saleForm").reset();fillSelects();$("saleProduct").value=products.find(p=>p.stock>0).id;updateSaleHint();$("saleDialog").showModal();
+});
+function updateSaleHint(){
+ const p=products.find(x=>x.id===$("saleProduct").value);
+ $("saleHint").textContent=p?`Disponible: ${p.stock} unidades. Precio: ${money(p.price)}.`:"";
+ $("saleQty").max=p?.stock||1;
+}
+$("saleProduct").addEventListener("change",updateSaleHint);
+$("saleForm").addEventListener("submit",event=>{
+ event.preventDefault();
+ const p=products.find(x=>x.id===$("saleProduct").value),quantity=Number($("saleQty").value);
+ if(!p||!Number.isInteger(quantity)||quantity<=0||quantity>p.stock){notify("No hay existencias suficientes.");return;}
+ const now=new Date(),id="V-"+String(db.nextSale++).padStart(4,"0");
+ p.stock-=quantity;
+ sales.push({id,product:p.name,quantity,date:now.toISOString().slice(0,10),iso:now.toISOString(),total:quantity*p.price,cost:p.cost||0,payment:$("salePayment").value,customer:$("saleCustomer").value});
+ db.movements.push({date:now.toLocaleDateString("es-BO"),product:p.name,type:"Venta",quantity,detail:id});
+ $("saleDialog").close();persist();notify("Venta registrada. Se descontó el inventario.");
+});
+$("addMovement").addEventListener("click",()=>{
+ if(!products.length){notify("Primero registra productos.");return;}
+ $("movementForm").reset();fillSelects();$("movementDialog").showModal();
+});
+$("movementForm").addEventListener("submit",event=>{
+ event.preventDefault();
+ const p=products.find(x=>x.id===$("movementProduct").value),quantity=Number($("movementQty").value),type=$("movementType").value;
+ if(!p||!Number.isInteger(quantity)||quantity<=0)return;
+ if(type==="Salida"&&quantity>p.stock){notify("No hay stock suficiente.");return;}
+ p.stock+=type==="Entrada"?quantity:-quantity;
+ db.movements.push({date:new Date().toLocaleDateString("es-BO"),product:p.name,type,quantity,detail:$("movementDetail").value});
+ $("movementDialog").close();persist();
+});
+$("addExpense").addEventListener("click",()=>{$("expenseForm").reset();$("expenseDialog").showModal();});
+$("expenseForm").addEventListener("submit",event=>{
+ event.preventDefault();
+ const amount=Number($("expenseAmount").value),name=$("expenseName").value.trim();
+ if(!name||amount<=0)return;
+ db.expenses.push({id:String(Date.now()),date:new Date().toLocaleDateString("es-BO"),name,category:$("expenseCategory").value,amount});
+ $("expenseDialog").close();persist();
+});
+window.removeExpense=id=>{if(confirm("¿Eliminar gasto?")){db.expenses=db.expenses.filter(e=>e.id!==id);persist();}};
+function renderMovements(){
+ $("movementTable").innerHTML=db.movements.slice().reverse().map(m=>`<tr><td>${escapeHTML(m.date)}</td><td>${escapeHTML(m.product)}</td><td>${escapeHTML(m.type)}</td><td>${m.quantity}</td><td>${escapeHTML(m.detail)}</td></tr>`).join("")||'<tr><td colspan="5">No hay movimientos registrados.</td></tr>';
+}
+function renderFinance(){
+ const cost=sales.reduce((sum,s)=>sum+(s.cost||0)*s.quantity,0),expenses=db.expenses.reduce((sum,e)=>sum+e.amount,0);
+ $("finIncome").textContent=money(totalIncome());$("finCosts").textContent=money(cost);
+ $("finExpenses").textContent=money(expenses);$("finProfit").textContent=money(totalIncome()-cost-expenses);
+ $("expenseTable").innerHTML=db.expenses.slice().reverse().map(e=>`<tr><td>${escapeHTML(e.date)}</td><td>${escapeHTML(e.name)}</td><td>${escapeHTML(e.category)}</td><td>${money(e.amount)}</td><td><button class="small-action danger" onclick="removeExpense('${e.id}')">Eliminar</button></td></tr>`).join("")||'<tr><td colspan="5">No hay gastos registrados.</td></tr>';
 }
 
 initialize();
