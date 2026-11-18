@@ -1084,3 +1084,13 @@ td strong {
         grid-template-columns: 90px 1fr 20px;
     }
 }
+
+/* Ampliación sin alterar el diseño original */
+.action-group{display:flex;gap:8px;flex-wrap:wrap}.zoho-link{display:inline-block;margin-top:12px;color:#a9c7ff;font-size:11px;text-decoration:none}
+.form-dialog{border:0;border-radius:12px;padding:24px;width:min(510px,calc(100% - 30px));box-shadow:0 20px 65px #14213a55}
+.form-dialog::backdrop{background:#101d32aa}.form-dialog h2{font-size:18px;margin-bottom:18px}.form-dialog label{display:block;color:#56647b;font-size:11px;margin:12px 0}
+.form-dialog input,.form-dialog select{display:block;width:100%;margin-top:6px;padding:11px;font-size:12px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
+.form-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:18px}.dialog-x{float:right;border:0;background:none;font-size:23px;color:#75829a}
+.small-action{border:0;border-radius:6px;background:#eaf1ff;color:#2459d3;padding:7px 9px;margin:2px;font-size:10px}.small-action.danger{background:#ffe9eb;color:#bb3b4c}
+.fine-print{color:#8591a3;font-size:11px;line-height:1.5;margin:12px 0}
+@media(max-width:600px){.form-grid{grid-template-columns:1fr}.action-group{width:100%}}
