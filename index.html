@@ -30,6 +30,8 @@
                 ♢ Notificaciones <span id="alertBadge">0</span>
             </button>
             <button class="nav-button" data-page="sales">🛒 Ventas</button>
+            <button class="nav-button" data-page="movements">↔ Movimientos de almacén</button>
+            <button class="nav-button" data-page="finance">Bs Finanzas y contabilidad</button>
             <button class="nav-button" data-page="analytics">▥ Análisis comercial</button>
             <button class="nav-button" data-page="reports">▧ Reportes</button>
         </nav>
@@ -38,7 +40,7 @@
             <div class="connection">
                 <strong>☁ Zoho Books</strong>
                 <p>Conexión pendiente</p>
-                <small>Preparado para integración</small>
+                <small>Sincronización pendiente</small><a class="zoho-link" href="https://books.zoho.com/" target="_blank" rel="noopener">Abrir Zoho Books ↗</a>
             </div>
             <div class="profile">
                 <div class="avatar">ZT</div>
@@ -157,7 +159,7 @@
                         <h2>Control de inventario</h2>
                         <p>Consulta las existencias de los productos.</p>
                     </div>
-                    <button class="primary-button" id="exportInventory">↓ Exportar inventario</button>
+                    <div class="action-group"><button class="primary-button" id="addProduct">＋ Agregar producto</button><button class="primary-button" id="exportInventory">↓ Exportar inventario</button></div>
                 </div>
 
                 <div class="mini-stats">
@@ -193,7 +195,7 @@
                                     <th>CATEGORÍA</th>
                                     <th>EXISTENCIAS</th>
                                     <th>PRECIO</th>
-                                    <th>ESTADO</th>
+                                    <th>ESTADO</th><th>ACCIONES</th>
                                 </tr>
                             </thead>
                             <tbody id="inventoryTable"></tbody>
@@ -230,7 +232,7 @@
                         <h2>Registro de ventas</h2>
                         <p>Consulta las operaciones comerciales registradas.</p>
                     </div>
-                    <span class="demo-tag">● Datos de demostración</span>
+                    <button class="primary-button" id="addSale">＋ Registrar venta</button>
                 </div>
 
                 <div class="mini-stats">
@@ -266,6 +268,17 @@
                 </article>
             </section>
 
+
+<section class="page" id="movements">
+<div class="intro"><div><h2>Movimientos de almacén</h2><p>Entradas, salidas y ventas registradas.</p></div><button class="primary-button" id="addMovement">＋ Nuevo movimiento</button></div>
+<article class="panel table-panel"><div class="table-heading"><h3>Historial de movimientos</h3></div><div class="table-scroll"><table><thead><tr><th>FECHA</th><th>PRODUCTO</th><th>TIPO</th><th>CANTIDAD</th><th>DETALLE</th></tr></thead><tbody id="movementTable"></tbody></table></div></article>
+</section>
+<section class="page" id="finance">
+<div class="intro"><div><h2>Finanzas y contabilidad</h2><p>Control de ingresos, costos y gastos.</p></div><button class="primary-button" id="addExpense">＋ Registrar gasto</button></div>
+<div class="stats"><article class="stat"><div class="stat-heading">Ingresos</div><h2 id="finIncome">Bs. 0</h2></article><article class="stat"><div class="stat-heading">Costo de ventas</div><h2 id="finCosts">Bs. 0</h2></article><article class="stat"><div class="stat-heading">Gastos</div><h2 id="finExpenses">Bs. 0</h2></article><article class="stat"><div class="stat-heading">Utilidad estimada</div><h2 id="finProfit">Bs. 0</h2></article></div>
+<article class="panel table-panel"><div class="table-heading"><h3>Historial de gastos</h3></div><div class="table-scroll"><table><thead><tr><th>FECHA</th><th>CONCEPTO</th><th>CATEGORÍA</th><th>MONTO</th><th>ACCIÓN</th></tr></thead><tbody id="expenseTable"></tbody></table></div></article>
+<p class="fine-print">Utilidad estimada = ingresos − costos de productos vendidos − gastos. No reemplaza la contabilidad oficial.</p>
+</section>
             <!-- ANÁLISIS -->
             <section class="page" id="analytics">
                 <div class="intro">
@@ -347,7 +360,7 @@
                     <div>
                         <h3>Integración con Zoho Books</h3>
                         <p>ZENTRIXTEC está diseñado para consultar información de Zoho Books mediante una futura conexión segura.</p>
-                        <span class="pending">● Integración pendiente de implementar</span>
+                        <span class="pending">● Sincronización API pendiente</span><p><a href="https://books.zoho.com/" target="_blank" rel="noopener">Entrar a Zoho Books ↗</a></p><p>El acceso abre Zoho Books; para sincronizar automáticamente se necesita OAuth 2.0 y un servidor seguro.</p>
                     </div>
                 </article>
             </section>
@@ -361,5 +374,28 @@
     </main>
 </div>
 
+
+<dialog id="productDialog" class="form-dialog"><form id="productForm">
+<button type="button" class="dialog-x" data-close="productDialog">×</button><h2 id="productHeading">Agregar producto</h2><input type="hidden" id="productId">
+<label>Producto<input id="productName" required maxlength="100"></label><div class="form-grid">
+<label>Categoría<select id="productCategory"><option>Computadoras</option><option>Impresoras</option><option>Accesorios</option><option>Monitores</option><option>Componentes</option><option>Otros</option></select></label>
+<label>Existencias<input id="productStock" type="number" min="0" step="1" required></label>
+<label>Precio de venta (Bs)<input id="productPrice" type="number" min="0.01" step="0.01" required></label>
+<label>Costo unitario (Bs)<input id="productCost" type="number" min="0" step="0.01" required></label>
+<label>Stock mínimo<input id="productMin" type="number" min="0" step="1" value="3" required></label></div>
+<div class="form-actions"><button type="button" class="secondary-button" data-close="productDialog">Cancelar</button><button class="primary-button">Guardar producto</button></div></form></dialog>
+<dialog id="saleDialog" class="form-dialog"><form id="saleForm">
+<button type="button" class="dialog-x" data-close="saleDialog">×</button><h2>Registrar venta</h2>
+<label>Producto<select id="saleProduct" required></select></label><div class="form-grid"><label>Cantidad<input id="saleQty" type="number" min="1" step="1" value="1" required></label><label>Pago<select id="salePayment"><option>Efectivo</option><option>QR</option><option>Transferencia</option></select></label></div>
+<label>Cliente (opcional)<input id="saleCustomer"></label><p class="fine-print" id="saleHint"></p>
+<div class="form-actions"><button type="button" class="secondary-button" data-close="saleDialog">Cancelar</button><button class="primary-button">Confirmar venta</button></div></form></dialog>
+<dialog id="movementDialog" class="form-dialog"><form id="movementForm">
+<button type="button" class="dialog-x" data-close="movementDialog">×</button><h2>Movimiento de almacén</h2>
+<label>Producto<select id="movementProduct" required></select></label><div class="form-grid"><label>Tipo<select id="movementType"><option>Entrada</option><option>Salida</option></select></label><label>Cantidad<input id="movementQty" type="number" min="1" step="1" required></label></div><label>Detalle<input id="movementDetail" placeholder="Ej. Compra a proveedor"></label>
+<div class="form-actions"><button type="button" class="secondary-button" data-close="movementDialog">Cancelar</button><button class="primary-button">Registrar</button></div></form></dialog>
+<dialog id="expenseDialog" class="form-dialog"><form id="expenseForm">
+<button type="button" class="dialog-x" data-close="expenseDialog">×</button><h2>Registrar gasto</h2>
+<label>Concepto<input id="expenseName" required></label><div class="form-grid"><label>Categoría<select id="expenseCategory"><option>Servicios</option><option>Alquiler</option><option>Transporte</option><option>Sueldos</option><option>Otros</option></select></label><label>Monto (Bs)<input id="expenseAmount" type="number" min="0.01" step="0.01" required></label></div>
+<div class="form-actions"><button type="button" class="secondary-button" data-close="expenseDialog">Cancelar</button><button class="primary-button">Guardar gasto</button></div></form></dialog>
 </body>
 </html>
